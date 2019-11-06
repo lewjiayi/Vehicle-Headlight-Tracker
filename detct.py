@@ -8,6 +8,7 @@ from blob import Blob
 cap = cv2.VideoCapture('stock_video/Pexels Videos 2053100.mp4')
 blobs = []
 index = 0
+speed = 20
 while (cap.isOpened()):
     ret, frame = cap.read()
     if ret:
@@ -43,7 +44,6 @@ while (cap.isOpened()):
         contours = np.delete(contours, badBlob)
 
         # Update Blob movement
-        updatedBlobs = []
         missingBlobs = []
         for countBlob, blob in enumerate(blobs, start=0):
             # Check previous frame blob saved with new frame blob
@@ -52,10 +52,9 @@ while (cap.isOpened()):
                 # Check if area moved only by small range
                 low = np.min(np.max(cnt,axis=1),axis=0)
                 high = np.max(np.max(cnt,axis=1),axis=0)
-                if (low[0] not in range(blob.box[0][0], blob.box[1][0]) or
-                    high[0] not in range(blob.box[0][0], blob.box[1][0]) or
-                    low[1] not in range(blob.box[0][1], blob.box[2][1]) or
-                    high[1] not in range(blob.box[0][1], blob.box[2][1])):
+                centerCnt = [(high[0]+low[0])/2, (high[1]+low[1])/2]
+                if (abs(centerCnt[0]-blob.center[0]) > speed or
+                    abs(centerCnt[1]-blob.center[1]) > speed ):
                     continue
                 # Check if cnt is similar
                 # ret = cv2.matchShapes(blob.contour, cnt, 2, 0)
@@ -66,8 +65,7 @@ while (cap.isOpened()):
                 if ((blob.area/areaCnt) >= 1.2 or
                     (blob.area/areaCnt) <= 0.8 ):
                     continue
-                blob.update(cnt, low, high, areaCnt)
-                updatedBlobs.append(blob)
+                blob.update(cnt, low, high, centerCnt, areaCnt)
                 isUpdated = True
                 break
             # Remove Matched Contour and flag missing blob
@@ -89,12 +87,12 @@ while (cap.isOpened()):
                 low = np.min(np.max(cnt,axis=1),axis=0)
                 high = np.max(np.max(cnt,axis=1),axis=0)
                 area = cv2.contourArea(cnt)
-                blobs.append(Blob(index, cnt, low, high, area))
-                updatedBlobs.append(Blob(index, cnt, low, high, area)) 
+                centerCnt = [(high[0]+low[0])/2, (high[1]+low[1])/2]
+                blobs.append(Blob(index, cnt, low, high, centerCnt, area))
 
-        for blob in updatedBlobs:
+        for blob in blobs:
             cv2.putText(resized, str(blob.index),
-                (int((blob.minVal[0]+blob.maxVal[0])/2), blob.maxVal[1] - 20),
+                (int(blob.center[0] - 10), int(blob.center[1] - 20)),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             # cv2.drawContours(resized, [blob.contour], -1, (0,0,0), 3)
         # cv2.rectangle(resized, (blobs[0].box[0][0], blobs[0].box[0][1]), (blobs[0].box[2][0], blobs[0].box[2][1]), (0,0,0), 2)
