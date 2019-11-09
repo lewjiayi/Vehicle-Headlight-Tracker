@@ -3,12 +3,23 @@ import cv2
 from matplotlib import pyplot as pt
 import math
 from blob import Blob
+from math import atan, sqrt
 
+def distance(start, end):
+    x = start[0] - end[0]
+    y = start[1] - end[1]
+    return sqrt((x*x)+(y*y))
+
+def theta(start, end):
+    x = start[0] - end[0]
+    y = start[1] - end[1]
+    return atan(y/x)
 
 cap = cv2.VideoCapture('stock_video/Pexels Videos 2053100.mp4')
 blobs = []
 index = 0
 speed = 20
+car = [[]]
 while (cap.isOpened()):
     ret, frame = cap.read()
     if ret:
@@ -65,7 +76,7 @@ while (cap.isOpened()):
                 if ((blob.area/areaCnt) >= 1.2 or
                     (blob.area/areaCnt) <= 0.8 ):
                     continue
-                blob.update(cnt, low, high, centerCnt, areaCnt)
+                blob.update(cnt, low, high, centerCnt, distance(centerCnt,blob.center), areaCnt)
                 isUpdated = True
                 break
             # Remove Matched Contour and flag missing blob

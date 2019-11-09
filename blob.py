@@ -7,11 +7,15 @@ class Blob():
         self.minVal = minVal
         self.maxVal = maxVal
         self.center = center
+        self.moved = 0
+        self.existed = 1
         self.area = area
 
-    def update(self, contour, minVal, maxVal, center, area):
+    def update(self, contour, minVal, maxVal, center, distance, area):
         self.contour = contour
         self.minVal = minVal
         self.maxVal = maxVal
         self.center = center
+        self.moved += distance
+        self.existed += 1
         self.area = area
