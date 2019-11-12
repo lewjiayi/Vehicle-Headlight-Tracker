@@ -15,7 +15,7 @@ def theta(start, end):
     y = start[1] - end[1]
     return atan(y/x)
 
-cap = cv2.VideoCapture('stock_video/Pexels Videos 2053100.mp4')
+cap = cv2.VideoCapture('stock_video/Pexels Videos 2103099.mp4')
 blobs = []
 index = 0
 speed = 20
@@ -164,10 +164,10 @@ while (cap.isOpened()):
             (10, 50),
             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
                     
-        # for blob in blobs:
-        #     cv2.putText(resized, str(blob.index),
-        #         (int(blob.center[0] - 10), int(blob.center[1] - 20)),
-        #         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        for blob in blobs:
+            cv2.putText(resized, str(blob.index),
+                (int(blob.center[0] - 10), int(blob.center[1] - 20)),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         #     cv2.drawContours(resized, [blob.contour], -1, (0,0,0), 3)
         # cv2.rectangle(resized, (blobs[0].box[0][0], blobs[0].box[0][1]), (blobs[0].box[2][0], blobs[0].box[2][1]), (0,0,0), 2)
 
