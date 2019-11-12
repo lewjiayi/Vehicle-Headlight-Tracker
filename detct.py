@@ -192,6 +192,9 @@ while (cap.isOpened()):
                     # GROUPING EM
                     cars.append([a,b])
                     # Append second for loop count is enough, as first loop proceeds on
+                    # If you are confused
+                    # First loop moved on to next iteration because it din't find a match, so there's no need to look back to those when look into second loop
+                    # If you are STILL confused, just accept the fact that this improve the efficiency of the code
                     groupedBlob.append((countA + countB + 1))
                     break
                     
