@@ -141,7 +141,7 @@ while (cap.isOpened()):
                 centerCnt = [(high[0]+low[0])/2, (high[1]+low[1])/2]
                 blobs.append(Blob(index, cnt, low, high, centerCnt, area))
         
-####### Group potential blobs as cars #######
+######## Group potential blobs as cars ########
         matched = False
         groupedBlob = []
         cars = [[]]
@@ -154,7 +154,7 @@ while (cap.isOpened()):
                 if (countA + countB + 1) in groupedBlob:
                     continue
 
-############### Check if eithing a certain range ###############
+                # Check if blob is witin a certain range
                 minValX = min(a.minVal[0], b.minVal[0])
                 maxValX = max(a.maxVal[0], b.maxVal[0])
                 # Set horizontal search limits for blobs
@@ -164,7 +164,7 @@ while (cap.isOpened()):
                 if (abs(a.center[1] - b.center[1]) > 15):
                         continue
 
-############### Check if blob are moving in same direction ###############
+                # Check if blob are moving in same direction
                 for countM, m in enumerate(blob.movement[:3], start=0):
                     matched = True
                     # The if else for zero is simply because I screwed up the blob class structure and too lazy to fix it
@@ -187,6 +187,7 @@ while (cap.isOpened()):
                         if ((a.origin[1] - a.movement[countM][1]) * (b.origin[1] - b.movement[countM][1])) < 0:
                             matched = False
                             break
+                        
                 # It's a match! GROUP EM
                 if matched:
                     # GROUPING EM
