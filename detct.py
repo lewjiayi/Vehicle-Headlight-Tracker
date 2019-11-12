@@ -119,31 +119,28 @@ while (cap.isOpened()):
             for countB, b in enumerate(potentialCar[(countA + 1):], start=0):
                 if (countA + countB + 1) in groupedBlob:
                     continue
-                if (abs(a.center[0] - b.center[0]) > 300):
+                minValX = min(a.minVal[0], b.minVal[0])
+                maxValX = max(a.maxVal[0], b.maxVal[0])
+                if (abs(minValX - maxValX) > 200):
                         continue
-                if (abs(a.center[1] - b.center[1]) > 30):
+                if (abs(a.center[1] - b.center[1]) > 15):
                         continue
-                print("start")
-                for countM, m in enumerate(blob.movement[:2], start=0):
+                for countM, m in enumerate(blob.movement[:3], start=0):
                     matched = True
                     if countM == 0:
-                        aMovement = [distance(a.origin, a.movement[countM]), theta(a.origin, a.movement[countM])]
-                        bMovement = [distance(b.origin, b.movement[countM]), theta(b.origin, b.movement[countM])]
+                        if (theta(a.origin, a.movement[countM]) * theta(b.origin, b.movement[countM])) < 0:
+                            matched = False
+                            break
+                        if ((a.origin[1] - a.movement[countM][1]) * (b.origin[1] - b.movement[countM][1])) < 0:
+                            matched = False
+                            break
                     else:
-                        aMovement = [distance(a.movement[countM - 1], a.movement[countM]), theta(a.movement[countM - 1], a.movement[countM])]
-                        bMovement = [distance(b.movement[countM - 1], b.movement[countM]), theta(b.movement[countM - 1], b.movement[countM])]
-                    
-                    print(a.movement[countM])
-                    if (aMovement[0] < 0.8*bMovement[0] or
-                        aMovement[0] > 1.2*bMovement[0]):
-                        # pass
-                        matched = False
-                        break
-                    # else:
-                    #     if (aMovement[1] < 0.8*bMovement[1] or
-                    #         aMovement[1] > 1.2*bMovement[1]):
-                    #         matched = False
-                    #         break
+                        if (theta(a.origin, a.movement[countM]) * theta(b.origin, b.movement[countM])) < 0:
+                            matched = False
+                            break
+                        if ((a.origin[1] - a.movement[countM][1]) * (b.origin[1] - b.movement[countM][1])) < 0:
+                            matched = False
+                            break
                 if matched:
                     cars.append([a,b])
                     groupedBlob.append((countA + countB + 1))
@@ -151,18 +148,10 @@ while (cap.isOpened()):
                     
         for countCar, car in enumerate(cars):
             if car:
-                if car[0].minVal[0] > car[1].minVal[0]:
-                    minValX = car[1].minVal[0]
-                    minValY = car[1].minVal[1]
-                else:
-                    minValX = car[0].minVal[0]
-                    minValY = car[0].minVal[1]
-                if car[0].maxVal[0] < car[1].maxVal[0]:
-                    maxValX = car[1].maxVal[0]
-                    maxValY = car[1].maxVal[1]
-                else:
-                    maxValX = car[0].maxVal[0]
-                    maxValY = car[0].maxVal[1]                
+                minValX = min(car[0].minVal[0], car[1].minVal[0])
+                minValY = min(car[0].minVal[1], car[1].minVal[1])
+                maxValX = max(car[0].maxVal[0], car[1].maxVal[0])
+                maxValY = max(car[0].maxVal[1], car[1].maxVal[1])              
                 centerX = (minValX + maxValX)/2
                 centerY = (minValY + maxValY)/2
                 # cv2.putText(resized, str(countCar),
@@ -175,10 +164,10 @@ while (cap.isOpened()):
             (10, 50),
             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
                     
-        for blob in blobs:
-            cv2.putText(resized, str(blob.index),
-                (int(blob.center[0] - 10), int(blob.center[1] - 20)),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        # for blob in blobs:
+        #     cv2.putText(resized, str(blob.index),
+        #         (int(blob.center[0] - 10), int(blob.center[1] - 20)),
+        #         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         #     cv2.drawContours(resized, [blob.contour], -1, (0,0,0), 3)
         # cv2.rectangle(resized, (blobs[0].box[0][0], blobs[0].box[0][1]), (blobs[0].box[2][0], blobs[0].box[2][1]), (0,0,0), 2)
 
