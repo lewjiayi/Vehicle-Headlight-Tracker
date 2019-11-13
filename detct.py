@@ -31,14 +31,14 @@ while (cap.isOpened()):
         hsv = cv2.cvtColor(resized, cv2.COLOR_BGR2HSV)
         # Grab the V layer of HSV
         v = hsv[:,:,2]
-        # Set threshold for V value at 254, max values at 255 (python uses 0 - 255 instead of 0 - 100)
+        # # Set threshold for V value at 254, max values at 255 (python uses 0 - 255 instead of 0 - 100)
         _, t = cv2.threshold(v, 254, 255, cv2.THRESH_BINARY)
         contours, hierarchy = cv2.findContours(t, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         # BGR alternative code
         # gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
         # blur = cv2.blur(gray, (5,5))
-        # _, t = cv2.threshold(blur, 240, 255, cv2.THRESH_BINARY)
+        # _, t = cv2.threshold(blur, 200, 255, cv2.THRESH_BINARY)
         # contours, hierarchy = cv2.findContours(t, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
 ####### Remove Bad Blob #######
@@ -210,11 +210,11 @@ while (cap.isOpened()):
                 # Look for center
                 centerX = (minValX + maxValX)/2
                 centerY = (minValY + maxValY)/2
-                # Draw em
+                # # Draw em
                 # cv2.putText(resized, str(countCar),
                 #     (int(centerX - 10), int(centerY - 20)),
                 #     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                cv2.rectangle(resized, (minValX, minValY), (maxValX, maxValY), (0,0,0), 2)
+                # cv2.rectangle(resized, (minValX, minValY), (maxValX, maxValY), (0,0,0), 2)
         
 ####### Text of cars detected #######
         text = "Car Detected: " + str(countCar)
@@ -223,11 +223,11 @@ while (cap.isOpened()):
             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
                     
 ####### Draw blobs #######
-        # for blob in blobs:
-        #     cv2.putText(resized, str(blob.index),
-        #         (int(blob.center[0] - 10), int(blob.center[1] - 20)),
-        #         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-        #     cv2.drawContours(resized, [blob.contour], -1, (0,0,0), 3)
+        for blob in blobs:
+            cv2.putText(resized, str(blob.index),
+                (int(blob.center[0] - 10), int(blob.center[1] - 20)),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            # cv2.drawContours(resized, [blob.contour], -1, (0,0,0), 3)
         # cv2.rectangle(resized, (blobs[0].box[0][0], blobs[0].box[0][1]), (blobs[0].box[2][0], blobs[0].box[2][1]), (0,0,0), 2)
 
 ####### Display results #######
