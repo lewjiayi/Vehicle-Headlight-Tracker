@@ -21,6 +21,9 @@ blobs = []
 index = 0
 # FPS sort of.. if low FPS, the blob move further between each frames
 speed = 20
+displayCount = 0
+displayText = 0
+carCountSum = 0
 while (cap.isOpened()):
     ret, frame = cap.read()
     if ret:
@@ -165,7 +168,7 @@ while (cap.isOpened()):
                         continue
 
                 # Check if blob are moving in same direction
-                for countM, m in enumerate(blob.movement[:3], start=0):
+                for countM, m in enumerate(blob.movement[-3:], start=0):
                     matched = True
                     # The if else for zero is simply because I screwed up the blob class structure and too lazy to fix it
                     if countM == 0:
@@ -181,10 +184,10 @@ while (cap.isOpened()):
                             break
                     else:
                         # SAME AS ABOVE LOL
-                        if (theta(a.origin, a.movement[countM]) * theta(b.origin, b.movement[countM])) < 0:
+                        if (theta(a.movement[countM - 1], a.movement[countM]) * theta(b.movement[countM - 1], b.movement[countM])) < 0:
                             matched = False
                             break
-                        if ((a.origin[1] - a.movement[countM][1]) * (b.origin[1] - b.movement[countM][1])) < 0:
+                        if ((a.movement[countM - 1][1] - a.movement[countM][1]) * (b.movement[countM - 1][1] - b.movement[countM][1])) < 0:
                             matched = False
                             break
                         
@@ -211,22 +214,37 @@ while (cap.isOpened()):
                 centerX = (minValX + maxValX)/2
                 centerY = (minValY + maxValY)/2
                 # # Draw em
-                # cv2.putText(resized, str(countCar),
-                #     (int(centerX - 10), int(centerY - 20)),
-                #     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                # cv2.rectangle(resized, (minValX, minValY), (maxValX, maxValY), (0,0,0), 2)
+                cv2.putText(resized, str(countCar),
+                    (int(centerX - 10), int(centerY - 20)),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                cv2.rectangle(resized, (minValX, minValY), (maxValX, maxValY), (0,0,0), 2)
         
+        if displayCount == 6:
+            displayCount = 0
+            carCountSum = 0
+        else:
+            displayCount += 1
+            carCountSum += countCar
+
+        if displayCount == 5:
+            displayText = int(carCountSum/displayCount)
+            if displayText == 0:
+                if not (carCountSum == 0):
+                    displayText = 1
+
+
+
 ####### Text of cars detected #######
-        text = "Car Detected: " + str(countCar)
+        text = "Car Detected: " + str(displayText)
         cv2.putText(resized, text,
             (10, 50),
             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
                     
 ####### Draw blobs #######
-        for blob in blobs:
-            cv2.putText(resized, str(blob.index),
-                (int(blob.center[0] - 10), int(blob.center[1] - 20)),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        # for blob in blobs:
+        #     cv2.putText(resized, str(blob.index),
+        #         (int(blob.center[0] - 10), int(blob.center[1] - 20)),
+        #         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             # cv2.drawContours(resized, [blob.contour], -1, (0,0,0), 3)
         # cv2.rectangle(resized, (blobs[0].box[0][0], blobs[0].box[0][1]), (blobs[0].box[2][0], blobs[0].box[2][1]), (0,0,0), 2)
 
