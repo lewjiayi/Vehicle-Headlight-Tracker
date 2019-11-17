@@ -36,6 +36,7 @@ cv2.createTrackbar('Car Count on Average                       ', 'Controller',5
 cv2.createTrackbar('Resize Value                                        ', 'Controller',4,10,nothing)
 cv2.createTrackbar('Headlight Min Area in Pixels            ', 'Controller',5,10,nothing)
 cv2.createTrackbar('Show Blob Detected                               ', 'Controller',0,1,nothing)
+cv2.createTrackbar('Block non-moving blob                          ', 'Controller',0,1,nothing)
 cv2.createTrackbar('Show Cars                                               ', 'Controller',1,1,nothing)
 cv2.createTrackbar('Car Direction Vertical - Horizontal      ', 'Controller',0,1,nothing)
 cv2.createTrackbar('Headlight max horizontal distance', 'Controller',5,10,nothing)
@@ -43,7 +44,7 @@ cv2.createTrackbar('Headlight max vertical distance      ', 'Controller',5,10,no
 cv2.createTrackbar('Camara FPS * 10                                   ', 'Controller',3,6,nothing)
 
 # Load Video
-cap = cv2.VideoCapture('stock_video/190802_15_LagosTraffic_05.mp4')
+cap = cv2.VideoCapture('stock_video/Pexels Videos 2099536.mp4')
 
 # Initialize Variable
 blobs = []
@@ -64,6 +65,7 @@ while (cap.isOpened()):
         resizeValue = cv2.getTrackbarPos('Resize Value                                        ', 'Controller')
         blobMinSize = (cv2.getTrackbarPos('Headlight Min Area in Pixels            ', 'Controller') * 10) + 1
         showBlob = cv2.getTrackbarPos('Show Blob Detected                               ', 'Controller')
+        killNotCar = cv2.getTrackbarPos('Block non-moving blob                          ', 'Controller')
         showCar = cv2.getTrackbarPos('Show Cars                                               ', 'Controller')
         carDirection = cv2.getTrackbarPos('Car Direction Vertical - Horizontal      ', 'Controller')
         carGroupX = cv2.getTrackbarPos('Headlight max horizontal distance', 'Controller') * 40 
@@ -72,7 +74,6 @@ while (cap.isOpened()):
 
         # Resize the video
         resized = cv2.resize(frame,(int(frame.shape[1]/resizeValue), int(frame.shape[0]/resizeValue)), fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
-        
 
 ####### HSV or BGR #######
         if BGR_HSV:
@@ -150,27 +151,19 @@ while (cap.isOpened()):
                 isUpdated = True
                 # Interested blob is found, the loop can be broke
                 break
-
             # If the blob is not missing
             if isUpdated:
                 # If it existed for few frames, it can potentially be a car
                 if blob.existed >= 3:
-                    potentialCar.append(blob)
+                    if blob.existed >= 100:
+                        if distance(blob.origin, blob.center) < (max(resized.shape)/20):
+                            blob.notACar()
+                    if blob.isCar:
+                        potentialCar.append(blob)
 
                 # Remove Matched Contour 
                 if (len(contours) > 0):
                     contours = np.delete(contours, countCnt)
-
-                # Check for non-moving blob  
-                # Assume 30FPS, 5 second and move less than 50px
-                # if (blob.existed > 150):
-                #     if ((distance(blob.origin, blob.center)) < 50):
-                #         blob.notcar()
-##################### DO A CHECKING EVERY 5 SECOND
-                    # if not blob.isCar():
-                    #     if (blob.existed > 300):
-                    #         if ((distance(blob.origin, blob.center)) > 50):
-                    #             blob.isACar()
             
             # If blob does not get updated, it simply is missing, flag it for removal later
             else:
@@ -198,9 +191,13 @@ while (cap.isOpened()):
             # Skip grouped blob
             if countA in groupedBlob:
                 continue
+            if not a.isCar:
+                continue
             for countB, b in enumerate(potentialCar[(countA + 1):], start=0):
                 # Skip grouped blob
                 if (countA + countB + 1) in groupedBlob:
+                    continue
+                if not b.isCar:
                     continue
 
                 # Check if blob is witin a certain range
@@ -221,6 +218,10 @@ while (cap.isOpened()):
                     # Set vertical search limits for blobs
                     if (abs(a.center[1] - b.center[1]) > carGroupY):
                             continue
+
+                if ((a.area/b.area) >= 1.2 or
+                    (a.area/b.area) <= 0.8 ):
+                    continue
 
                 # Check if blob are moving in same direction
                 for countM, m in enumerate(blob.movement[-3:], start=0):

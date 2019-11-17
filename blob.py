@@ -22,7 +22,7 @@ class Blob():
         self.area = area
         self.movement.append(center)
 
-    def notCar(self):
+    def notACar(self):
         self.isCar = False
 
     def isACar (self):
