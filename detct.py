@@ -104,15 +104,6 @@ while (cap.isOpened()):
             if cv2.contourArea(cnt) < blobMinSize:
                 badBlob.append(countCnt)
 
-            # Alternative code to remove small blob using length
-            # if (abs(x) < 3) or (abs(y) < 3):
-            #     badBlob.append(countCnt)
-            #     continue
-
-            # Remove unpropotional blob, however some light shape are way too weird to implement this
-            # elif (x/y < 0.5) or (x/y > 2):
-            #     badBlob.append(countCnt)
-            #     continue
         contours = np.delete(contours, badBlob)
 
 ####### Update Blob movement #######
@@ -131,11 +122,6 @@ while (cap.isOpened()):
                 if (abs(centerCnt[0]-blob.center[0]) > camFPS or
                     abs(centerCnt[1]-blob.center[1]) > camFPS ):
                     continue
-
-                # Check if cnt is similar using moments, not a good way as blobs can change quite drasticly at edges but area is about the same
-                # ret = cv2.matchShapes(blob.contour, cnt, 2, 0)
-                # if ret >= 0.5:
-                    # continue
 
                 # Check if area is similar
                 areaCnt = cv2.contourArea(cnt)
