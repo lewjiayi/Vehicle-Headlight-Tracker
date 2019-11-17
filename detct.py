@@ -15,34 +15,80 @@ def theta(start, end):
     y = start[1] - end[1]
     return atan(y/x)
 
-cap = cv2.VideoCapture('stock_video/Pexels Videos 2053100.mp4')
+def nothing(x):
+    pass
+
+# Track bars
+blank = np.zeros((200, 400), dtype=np.uint8)
+instruction1 = "Please read readme.md"
+instruction2 = "before tweaking the"
+instruction3 = "values below"
+cv2.putText(blank, instruction1 ,(10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+cv2.putText(blank, instruction2,(10, 90), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+cv2.putText(blank, instruction3 ,(10, 130), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+cv2.namedWindow('Output')
+cv2.namedWindow('Controller')
+cv2.createTrackbar('BGR - HSV                                                 ', 'Controller',1,1,nothing)
+cv2.createTrackbar('BGR Threshold                                    ', 'Controller',4,10,nothing)
+cv2.createTrackbar('HSV Threshold                                    ', 'Controller',9,10,nothing)
+cv2.createTrackbar('Stablize Display Count                            ', 'Controller',0,1,nothing)
+cv2.createTrackbar('Car Count on Average                       ', 'Controller',5,10,nothing)
+cv2.createTrackbar('Resize Value                                        ', 'Controller',4,10,nothing)
+cv2.createTrackbar('Headlight Min Area in Pixels            ', 'Controller',5,10,nothing)
+cv2.createTrackbar('Show Blob Detected                               ', 'Controller',0,1,nothing)
+cv2.createTrackbar('Show Cars                                               ', 'Controller',1,1,nothing)
+cv2.createTrackbar('Car Direction Vertical - Horizontal      ', 'Controller',0,1,nothing)
+cv2.createTrackbar('Headlight max horizontal distance', 'Controller',5,10,nothing)
+cv2.createTrackbar('Headlight max vertical distance      ', 'Controller',5,10,nothing)
+cv2.createTrackbar('Camara FPS * 10                                   ', 'Controller',3,6,nothing)
+
+# Load Video
+cap = cv2.VideoCapture('stock_video/190802_15_LagosTraffic_05.mp4')
+
+# Initialize Variable
 blobs = []
-# Index for blobs
-index = 0
-# FPS sort of.. if low FPS, the blob move further between each frames
-speed = 20
-displayCount = 0
-displayText = 0
-carCountSum = 0
+index = 0 # Index for blobs
+displayCount = 0 # Count Frames
+displayText = 0 # Car Count Display
+carCount = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Car count per frame, up to 10 frames
+
+# Start video
 while (cap.isOpened()):
     ret, frame = cap.read()
     if ret:
-        # Resize the video
-        resized = cv2.resize(frame,(int(frame.shape[1]/4), int(frame.shape[0]/4)), fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
-        
-        # HSV alternative code
-        hsv = cv2.cvtColor(resized, cv2.COLOR_BGR2HSV)
-        # Grab the V layer of HSV
-        v = hsv[:,:,2]
-        # # Set threshold for V value at 254, max values at 255 (python uses 0 - 255 instead of 0 - 100)
-        _, t = cv2.threshold(v, 254, 255, cv2.THRESH_BINARY)
-        contours, hierarchy = cv2.findContours(t, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        BGR_HSV = cv2.getTrackbarPos('BGR - HSV                                                 ', 'Controller')
+        BGRThreshold = (cv2.getTrackbarPos('BGR Threshold                                    ', 'Controller') * 10) + 155
+        HSVThreshold = cv2.getTrackbarPos('HSV Threshold                                    ', 'Controller') + 245
+        toggleStableCount = cv2.getTrackbarPos('Stablize Display Count                            ', 'Controller')
+        stableCountValue = cv2.getTrackbarPos('Car Count on Average                       ', 'Controller')
+        resizeValue = cv2.getTrackbarPos('Resize Value                                        ', 'Controller')
+        blobMinSize = (cv2.getTrackbarPos('Headlight Min Area in Pixels            ', 'Controller') * 10) + 1
+        showBlob = cv2.getTrackbarPos('Show Blob Detected                               ', 'Controller')
+        showCar = cv2.getTrackbarPos('Show Cars                                               ', 'Controller')
+        carDirection = cv2.getTrackbarPos('Car Direction Vertical - Horizontal      ', 'Controller')
+        carGroupX = cv2.getTrackbarPos('Headlight max horizontal distance', 'Controller') * 40 
+        carGroupY = cv2.getTrackbarPos('Headlight max vertical distance      ', 'Controller') * 3
+        camFPS = (6 - cv2.getTrackbarPos('Camara FPS * 10                                 ', 'Controller')) * 10
 
-        # BGR alternative code
-        # gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
-        # blur = cv2.blur(gray, (5,5))
-        # _, t = cv2.threshold(blur, 200, 255, cv2.THRESH_BINARY)
-        # contours, hierarchy = cv2.findContours(t, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # Resize the video
+        resized = cv2.resize(frame,(int(frame.shape[1]/resizeValue), int(frame.shape[0]/resizeValue)), fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
+        
+
+####### HSV or BGR #######
+        if BGR_HSV:
+            # HSV alternative code
+            hsv = cv2.cvtColor(resized, cv2.COLOR_BGR2HSV)
+            # Grab the V layer of HSV
+            v = hsv[:,:,2]
+            # Set threshold for V value at 254, max values at 255 (python uses 0 - 255 instead of 0 - 100)
+            _, t = cv2.threshold(v, HSVThreshold, 255, cv2.THRESH_BINARY)
+            contours, hierarchy = cv2.findContours(t, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        else:
+            # BGR alternative code
+            gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
+            blur = cv2.blur(gray, (5,5))
+            _, t = cv2.threshold(blur, BGRThreshold, 255, cv2.THRESH_BINARY)
+            contours, hierarchy = cv2.findContours(t, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
 ####### Remove Bad Blob #######
         badBlob = []
@@ -56,7 +102,7 @@ while (cap.isOpened()):
             y = high[1] - low[1]
 
             # Removing blob smaller than 50px
-            if cv2.contourArea(cnt) < 50:
+            if cv2.contourArea(cnt) < blobMinSize:
                 badBlob.append(countCnt)
 
             # Alternative code to remove small blob using length
@@ -83,8 +129,8 @@ while (cap.isOpened()):
                 # Get the center of blob
                 centerCnt = [(high[0]+low[0])/2, (high[1]+low[1])/2]
                 # Check is blob is in range defined by FPS
-                if (abs(centerCnt[0]-blob.center[0]) > speed or
-                    abs(centerCnt[1]-blob.center[1]) > speed ):
+                if (abs(centerCnt[0]-blob.center[0]) > camFPS or
+                    abs(centerCnt[1]-blob.center[1]) > camFPS ):
                     continue
 
                 # Check if cnt is similar using moments, not a good way as blobs can change quite drasticly at edges but area is about the same
@@ -160,12 +206,21 @@ while (cap.isOpened()):
                 # Check if blob is witin a certain range
                 minValX = min(a.minVal[0], b.minVal[0])
                 maxValX = max(a.maxVal[0], b.maxVal[0])
-                # Set horizontal search limits for blobs
-                if (abs(minValX - maxValX) > 200):
-                        continue
-                # Set vertical search limits for blobs
-                if (abs(a.center[1] - b.center[1]) > 15):
-                        continue
+
+                if carDirection:
+                    # Set horizontal search limits for blobs
+                    if (abs(minValX - maxValX) > carGroupY):
+                            continue
+                    # Set vertical search limits for blobs
+                    if (abs(a.center[1] - b.center[1]) > carGroupX):
+                            continue
+                else:
+                    # Set horizontal search limits for blobs
+                    if (abs(minValX - maxValX) > carGroupX):
+                            continue
+                    # Set vertical search limits for blobs
+                    if (abs(a.center[1] - b.center[1]) > carGroupY):
+                            continue
 
                 # Check if blob are moving in same direction
                 for countM, m in enumerate(blob.movement[-3:], start=0):
@@ -203,54 +258,59 @@ while (cap.isOpened()):
                     break
                     
 ####### Draw stuff around the car headlights #######
-        for countCar, car in enumerate(cars):
-            if car:
-                # Look for borders
-                minValX = min(car[0].minVal[0], car[1].minVal[0])
-                minValY = min(car[0].minVal[1], car[1].minVal[1])
-                maxValX = max(car[0].maxVal[0], car[1].maxVal[0])
-                maxValY = max(car[0].maxVal[1], car[1].maxVal[1])      
-                # Look for center
-                centerX = (minValX + maxValX)/2
-                centerY = (minValY + maxValY)/2
-                # # Draw em
-                cv2.putText(resized, str(countCar),
-                    (int(centerX - 10), int(centerY - 20)),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                cv2.rectangle(resized, (minValX, minValY), (maxValX, maxValY), (0,0,0), 2)
+        if showCar:
+            for countCar, car in enumerate(cars):
+                if car:
+                    # Look for borders
+                    minValX = min(car[0].minVal[0], car[1].minVal[0])
+                    minValY = min(car[0].minVal[1], car[1].minVal[1])
+                    maxValX = max(car[0].maxVal[0], car[1].maxVal[0])
+                    maxValY = max(car[0].maxVal[1], car[1].maxVal[1])      
+                    # Look for center
+                    centerX = (minValX + maxValX)/2
+                    centerY = (minValY + maxValY)/2
+                    # # Draw em
+                    cv2.putText(resized, str(countCar),
+                        (int(centerX - 10), int(centerY - 20)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                    cv2.rectangle(resized, (minValX, minValY), (maxValX, maxValY), (0,0,0), 2)
         
-        if displayCount == 6:
-            displayCount = 0
-            carCountSum = 0
+####### Text of cars detected #######     
+        carCount.append(countCar)
+        carCount.pop(0)
+        displayCount += 1
+        if toggleStableCount:
+            if stableCountValue == 0:
+                stableCountValue = 1
+            if (displayCount % stableCountValue) == 0:
+                carCountSum = 0
+                for x in carCount[-stableCountValue:]:
+                    carCountSum += x
+                displayText = int(carCountSum/stableCountValue)
+                if displayText == 0:
+                    if not (carCountSum == 0):
+                        displayText = 1
+                if displayCount >= 1000:
+                    displayCount = 0
         else:
-            displayCount += 1
-            carCountSum += countCar
+            displayText = countCar
 
-        if displayCount == 5:
-            displayText = int(carCountSum/displayCount)
-            if displayText == 0:
-                if not (carCountSum == 0):
-                    displayText = 1
-
-
-
-####### Text of cars detected #######
         text = "Car Detected: " + str(displayText)
         cv2.putText(resized, text,
             (10, 50),
             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
                     
 ####### Draw blobs #######
-        # for blob in blobs:
-        #     cv2.putText(resized, str(blob.index),
-        #         (int(blob.center[0] - 10), int(blob.center[1] - 20)),
-        #         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            # cv2.drawContours(resized, [blob.contour], -1, (0,0,0), 3)
-        # cv2.rectangle(resized, (blobs[0].box[0][0], blobs[0].box[0][1]), (blobs[0].box[2][0], blobs[0].box[2][1]), (0,0,0), 2)
+        if showBlob:
+            for blob in blobs:
+                cv2.putText(resized, str(blob.index),
+                    (int(blob.center[0] - 10), int(blob.center[1] - 20)),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                cv2.drawContours(resized, [blob.contour], -1, (0,0,0), 3)
 
 ####### Display results #######
-        cv2.imshow('hsv', resized)
-        
+        cv2.imshow('Output', resized)
+        cv2.imshow('Controller',blank)
 ### Restart video ###
     else:
         cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
