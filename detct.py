@@ -1,19 +1,17 @@
 import numpy as np
 import cv2
-from matplotlib import pyplot as pt
 import math
 from blob import Blob
-from math import atan, sqrt
 
 def distance(start, end):
     x = start[0] - end[0]
     y = start[1] - end[1]
-    return sqrt((x*x)+(y*y))
+    return math.sqrt((x*x)+(y*y))
 
 def theta(start, end):
     x = start[0] - end[0]
     y = start[1] - end[1]
-    return atan(y/x)
+    return math.atan(y/x)
 
 def nothing(x):
     pass
