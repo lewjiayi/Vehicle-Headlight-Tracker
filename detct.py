@@ -36,7 +36,6 @@ cv2.createTrackbar('Car Count on Average                       ', 'Controller',5
 cv2.createTrackbar('Resize Value                                        ', 'Controller',4,10,nothing)
 cv2.createTrackbar('Headlight Min Area in Pixels            ', 'Controller',5,10,nothing)
 cv2.createTrackbar('Show Blob Detected                               ', 'Controller',0,1,nothing)
-cv2.createTrackbar('Block non-moving blob                          ', 'Controller',0,1,nothing)
 cv2.createTrackbar('Show Cars                                               ', 'Controller',1,1,nothing)
 cv2.createTrackbar('Car Direction Vertical - Horizontal      ', 'Controller',0,1,nothing)
 cv2.createTrackbar('Headlight max horizontal distance', 'Controller',5,10,nothing)
@@ -65,7 +64,6 @@ while (cap.isOpened()):
         resizeValue = cv2.getTrackbarPos('Resize Value                                        ', 'Controller')
         blobMinSize = (cv2.getTrackbarPos('Headlight Min Area in Pixels            ', 'Controller') * 10) + 1
         showBlob = cv2.getTrackbarPos('Show Blob Detected                               ', 'Controller')
-        killNotCar = cv2.getTrackbarPos('Block non-moving blob                          ', 'Controller')
         showCar = cv2.getTrackbarPos('Show Cars                                               ', 'Controller')
         carDirection = cv2.getTrackbarPos('Car Direction Vertical - Horizontal      ', 'Controller')
         carGroupX = cv2.getTrackbarPos('Headlight max horizontal distance', 'Controller') * 40 
