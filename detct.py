@@ -4,7 +4,7 @@ import math
 from blob import Blob
 
 # Load Video
-cap = cv2.VideoCapture('stock_video/Pexels Videos 2053100.mp4')
+cap = cv2.VideoCapture('stock_video/Pexels Videos 2099536.mp4')
 
 # Define functions
 def distance(start, end):
@@ -17,6 +17,7 @@ def theta(start, end):
     y = start[1] - end[1]
     return math.atan(y/x)
 
+# Trackbar requires an function input
 def nothing(x):
     pass
 
@@ -54,6 +55,7 @@ carCount = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Car count per frame, up to 10 frames
 # Start video
 while (cap.isOpened()):
     ret, frame = cap.read()
+    # cap.set(1,200)
     if ret:
         BGR_HSV = cv2.getTrackbarPos('BGR - HSV                                                 ', 'Controller')
         BGRThreshold = (cv2.getTrackbarPos('BGR Threshold                                    ', 'Controller') * 10) + 155
@@ -302,7 +304,7 @@ while (cap.isOpened()):
 ### Play video ###
     # Change the number in waitkey brackets to alter play speed, bigger number slower speed
     # 'q' means press q to exit
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    if cv2.waitKey() & 0xFF == ord('q'):
         break
 
 cap.release()

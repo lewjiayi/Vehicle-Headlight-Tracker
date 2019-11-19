@@ -105,20 +105,3 @@ The variables of the controller are as below:
 > Max Value: 5
 > Default Value: 3
 > Why max value at 50FPS? If the FPS is too high, the light does not seems to move at all from one frame to another, and, I couldn't afford 60FPS camera :( so no one is get to process 60 FPS video
-
-Features to implement
-
-1. Display car detected as average number of few frames fo number dont jump too much
-2. Detect non moving object and put black spot on it before drawing contour everytime to prevent lag
-3. Movement are checking twice in cnt and cars, should try implement in one loop
-4. Car detection range is still hardcoded
-5. Bad blob checking area constraint is still hardcoded, can try user input
-
-Constraint
-
-1. atan might have error values
-2. HSV too sensitive (reflective) while BGR take in all white cars, bright environment should use HSV while dark environment can use BGR
-
-Note
-
-1. For theta (vector) moving in Q1 and Q3 result in positive while moving in Q2 and Q4 result in negative number
