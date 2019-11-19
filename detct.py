@@ -3,6 +3,10 @@ import cv2
 import math
 from blob import Blob
 
+# Load Video
+cap = cv2.VideoCapture('stock_video/Pexels Videos 2053100.mp4')
+
+# Define functions
 def distance(start, end):
     x = start[0] - end[0]
     y = start[1] - end[1]
@@ -31,17 +35,14 @@ cv2.createTrackbar('BGR Threshold                                    ', 'Control
 cv2.createTrackbar('HSV Threshold                                    ', 'Controller',9,10,nothing)
 cv2.createTrackbar('Stablize Display Count                            ', 'Controller',0,1,nothing)
 cv2.createTrackbar('Car Count on Average                       ', 'Controller',5,10,nothing)
-cv2.createTrackbar('Resize Value                                        ', 'Controller',4,10,nothing)
+cv2.createTrackbar('Resize Value                                        ', 'Controller',7,10,nothing)
 cv2.createTrackbar('Headlight Min Area in Pixels            ', 'Controller',5,10,nothing)
 cv2.createTrackbar('Show Blob Detected                               ', 'Controller',0,1,nothing)
 cv2.createTrackbar('Show Cars                                               ', 'Controller',1,1,nothing)
 cv2.createTrackbar('Car Direction Vertical - Horizontal      ', 'Controller',0,1,nothing)
 cv2.createTrackbar('Headlight max horizontal distance', 'Controller',5,10,nothing)
 cv2.createTrackbar('Headlight max vertical distance      ', 'Controller',5,10,nothing)
-cv2.createTrackbar('Camara FPS * 10                                   ', 'Controller',3,6,nothing)
-
-# Load Video
-cap = cv2.VideoCapture('stock_video/Pexels Videos 2099536.mp4')
+cv2.createTrackbar('Camera FPS * 10                                   ', 'Controller',3,5,nothing)
 
 # Initialize Variable
 blobs = []
@@ -59,14 +60,14 @@ while (cap.isOpened()):
         HSVThreshold = cv2.getTrackbarPos('HSV Threshold                                    ', 'Controller') + 245
         toggleStableCount = cv2.getTrackbarPos('Stablize Display Count                            ', 'Controller')
         stableCountValue = cv2.getTrackbarPos('Car Count on Average                       ', 'Controller')
-        resizeValue = cv2.getTrackbarPos('Resize Value                                        ', 'Controller')
+        resizeValue = 11 - cv2.getTrackbarPos('Resize Value                                        ', 'Controller')
         blobMinSize = (cv2.getTrackbarPos('Headlight Min Area in Pixels            ', 'Controller') * 10) + 1
         showBlob = cv2.getTrackbarPos('Show Blob Detected                               ', 'Controller')
         showCar = cv2.getTrackbarPos('Show Cars                                               ', 'Controller')
         carDirection = cv2.getTrackbarPos('Car Direction Vertical - Horizontal      ', 'Controller')
-        carGroupX = cv2.getTrackbarPos('Headlight max horizontal distance', 'Controller') * 40 
-        carGroupY = cv2.getTrackbarPos('Headlight max vertical distance      ', 'Controller') * 3
-        camFPS = (6 - cv2.getTrackbarPos('Camara FPS * 10                                 ', 'Controller')) * 10
+        carGroupX = cv2.getTrackbarPos('Headlight max horizontal distance', 'Controller')
+        carGroupY = cv2.getTrackbarPos('Headlight max vertical distance      ', 'Controller')
+        camFPS = (6 - cv2.getTrackbarPos('Camera FPS * 10                                   ', 'Controller')) * 10
 
         # Resize the video
         resized = cv2.resize(frame,(int(frame.shape[1]/resizeValue), int(frame.shape[0]/resizeValue)), fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
@@ -98,7 +99,7 @@ while (cap.isOpened()):
             x = high[0] - low[0]
             y = high[1] - low[1]
 
-            # Removing blob smaller than 50px
+            # Removing blob smaller than specific sizes
             if cv2.contourArea(cnt) < blobMinSize:
                 badBlob.append(countCnt)
 
@@ -188,22 +189,22 @@ while (cap.isOpened()):
 
                 if carDirection:
                     # Set horizontal search limits for blobs
-                    if (abs(minValX - maxValX) > carGroupY):
+                    if (abs(minValX - maxValX) > (carGroupY * 40)):
                             continue
                     # Set vertical search limits for blobs
-                    if (abs(a.center[1] - b.center[1]) > carGroupX):
+                    if (abs(a.center[1] - b.center[1]) > (carGroupX * 3)):
                             continue
                 else:
                     # Set horizontal search limits for blobs
-                    if (abs(minValX - maxValX) > carGroupX):
+                    if (abs(minValX - maxValX) > (carGroupX * 40)):
                             continue
                     # Set vertical search limits for blobs
-                    if (abs(a.center[1] - b.center[1]) > carGroupY):
+                    if (abs(a.center[1] - b.center[1]) > (carGroupY * 3)):
                             continue
 
-                if ((a.area/b.area) >= 1.2 or
-                    (a.area/b.area) <= 0.8 ):
-                    continue
+                # if ((a.area/b.area) >= 1.2 or
+                #     (a.area/b.area) <= 0.8 ):
+                #     continue
 
                 # Check if blob are moving in same direction
                 for countM, m in enumerate(blob.movement[-3:], start=0):

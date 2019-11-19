@@ -24,6 +24,3 @@ class Blob():
 
     def notACar(self):
         self.isCar = False
-
-    def isACar (self):
-        self.isCar = True
