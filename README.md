@@ -1,8 +1,57 @@
 # Vehicle-Headlight-Tracker
 
-This is an algorithm that detecte cars on the road using headlights. It detects the lights and pair their movement as moving cars. When light source is not moving for some time, it will be excluded from grouping and treated as background light.
+This is simple program that detects and tracks cars on the road using headlights. It detects the lights and pair their movement as moving cars. When light source is not moving for some time, it will be excluded from grouping and treated as background light.
 
-## Instructions
+Detection is done using OpenCV built in `cv2.findContours` function. Pairing and tracking is done using some simple vector and trigonometry to identify movement direction.
+
+## Running
+
+Install the requirements
+
+```shell
+pip3 install requirements.txt
+```
+
+In [detect.py](detct.py) line 7, input a video path as follow, `cap = cv2.VideoCapture('video/1.mp4')`
+
+Then, run the file
+
+```shell
+python3 detect.py
+```
+
+## How it works
+
+Here is a simple flow chart of how the project works
+
+![flow](assets/flow.png)
+
+The program outputs 2 windows, namely 'Output' and 'Controller'. As the name suggests, the 'Output' window show the result of the processed window while 'Controller' is used to control the variables of algorithm for better performances.
+
+Here is a simple explaination of how the project works step by step.
+
+1. Load the video and run the program
+2. Read the values from controller panel
+3. Process frame with values read
+4. From current frame, a [Blob](blob.py) object is created for each blob of bright spot in frame
+5. Eliminate uninterested blob
+6. Track the movement of each blob from entering until leaving the frame
+7. Match pair of blobs together as a car
+8. Output car detected
+
+To understand to program better, read the [User Manual](#user-manual) on how to use the controller panel. Then, read the [documentation](docs.md) that breaks down the code with explaination.
+
+## Sample Output
+
+Sample output of processed video frame
+
+![output](assets/Output.png)
+
+Sample image of controller panel
+
+![controller](assets/Controller.png)
+
+## User Manual
 
 The algorithm output with 2 windows, namely 'Output' and 'Controller'. As the name suggests, the 'Output' window show the result of the processed window while 'Controller' is used to control the variables of algorithm for better performances
 
@@ -104,4 +153,3 @@ The variables of the controller are as below:
 > Min Value: 0
 > Max Value: 5
 > Default Value: 3
-> Why max value at 50FPS? If the FPS is too high, the light does not seems to move at all from one frame to another, and, I couldn't afford 60FPS camera :( so no one is get to process 60 FPS video
